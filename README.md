@@ -2,6 +2,8 @@
 
 Dropbox 스타일 파일 관리, 논문 데이터베이스, 이미지 갤러리와 지속 오디오 플레이어를 결합한 개인용 NAS 웹 애플리케이션입니다. Node.js 24 표준 라이브러리와 내장 SQLite를 사용하는 단일 모놀리스이며 npm 패키지는 필요하지 않습니다.
 
+![Archive Home Dashboard](docs/home-dashboard.png)
+
 ## 실행
 
 ```sh
