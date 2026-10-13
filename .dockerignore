@@ -1,0 +1,9 @@
+.git
+.env*
+!.env.example
+data/*
+!data/.gitkeep
+storage/*
+!storage/.gitkeep
+test_*.js
+*.log

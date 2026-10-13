@@ -1,0 +1,37 @@
+services:
+  web:
+    image: archive-nas:public
+    build: .
+    environment:
+      NAS_PASSWORD: ${NAS_PASSWORD:-}
+      COOKIE_SECURE: "1"
+      STORAGE_DIR: /app/storage
+      DATA_DIR: /app/data
+      MAX_UPLOAD_SIZE: ${MAX_UPLOAD_SIZE:-10737418240}
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    volumes:
+      - ${STORAGE_DIR:-./storage}:/app/storage
+      - ./data:/app/data
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -qO-, http://127.0.0.1:4173/healthz]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --protocol http2 --url http://web:4173
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped

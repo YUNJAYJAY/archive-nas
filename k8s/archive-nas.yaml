@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: archive-nas
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: archive-nas
+  namespace: archive-nas
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: archive-nas
+  template:
+    metadata:
+      labels:
+        app: archive-nas
+    spec:
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: archive-nas
+          image: archive-nas:latest
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 4173
+          env:
+            - name: STORAGE_DIR
+              value: /app/storage
+            - name: DATA_DIR
+              value: /app/data
+            - name: COOKIE_SECURE
+              value: "0"
+            - name: NAS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: archive-nas-auth
+                  key: password
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+            - name: data
+              mountPath: /app/data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: storage
+          hostPath:
+            path: /mnt/archive-nas/storage
+            type: DirectoryOrCreate
+        - name: data
+          hostPath:
+            path: /home/jayjay/archive-nas/data
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: archive-nas
+  namespace: archive-nas
+spec:
+  type: NodePort
+  selector:
+    app: archive-nas
+  ports:
+    - name: http
+      port: 4173
+      targetPort: http
+      nodePort: 30180

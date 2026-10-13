@@ -1,0 +1,26 @@
+services:
+  archive-nas:
+    build: .
+    container_name: archive-nas
+    init: true
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${NAS_PORT:-4180}:4173"
+    environment:
+      NAS_PASSWORD: ${NAS_PASSWORD:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+      STORAGE_DIR: /app/storage
+      DATA_DIR: /app/data
+      MAX_UPLOAD_SIZE: ${MAX_UPLOAD_SIZE:-10737418240}
+    volumes:
+      - ${STORAGE_DIR:-./storage}:/app/storage
+      - ./data:/app/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -qO-, http://127.0.0.1:4173/healthz]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#fafafa">
+  <title>Archive — Personal Cloud</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M9 11h14v12H9zm3-3h8v3h-8z' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="registerScreen" class="login-screen hidden">
+    <form id="registerForm" class="login-card register-card">
+      <div class="brand-mark">A</div>
+      <div><h1>Archive 시작하기</h1><p>이 NAS를 관리할 첫 사용자를 등록하세요.</p></div>
+      <label>사용자 이름<input id="registerName" autocomplete="name" maxlength="60" placeholder="My Archive" required></label>
+      <label>비밀번호<input id="registerPassword" type="password" autocomplete="new-password" minlength="10" required></label>
+      <label>비밀번호 확인<input id="registerPasswordConfirm" type="password" autocomplete="new-password" minlength="10" required></label>
+      <p id="registerError" class="form-error" role="alert"></p>
+      <button class="button primary wide" type="submit">관리자 등록</button>
+    </form>
+  </div>
+
+  <div id="loginScreen" class="login-screen">
+    <form id="loginForm" class="login-card">
+      <div class="brand-mark">A</div>
+      <div><h1>Archive</h1><p>개인 클라우드에 로그인하세요.</p></div>
+      <label>비밀번호<input id="passwordInput" type="password" autocomplete="current-password" autofocus required></label>
+      <p id="loginError" class="form-error" role="alert"></p>
+      <button class="button primary wide" type="submit">로그인</button>
+    </form>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <a class="brand" href="#home" data-route="home"><span class="brand-mark">A</span><span>Archive</span></a>
+      <nav class="nav" aria-label="주요 메뉴">
+        <button data-route="home"><span data-icon="home"></span>Home</button>
+        <button data-route="files"><span data-icon="folder"></span>Files</button>
+        <button data-route="documents"><span data-icon="document"></span>Documents</button>
+        <button data-route="papers"><span data-icon="paper"></span>Papers</button>
+        <button data-route="photos"><span data-icon="image"></span>Photos</button>
+        <button data-route="videos"><span data-icon="video"></span>Videos</button>
+        <button data-route="music"><span data-icon="music"></span>Music</button>
+      </nav>
+      <nav class="nav secondary" aria-label="보조 메뉴">
+        <button data-route="favorites"><span data-icon="star"></span>Favorites</button>
+        <button data-route="recent"><span data-icon="clock"></span>Recent</button>
+        <button data-route="trash"><span data-icon="trash"></span>Trash</button>
+      </nav>
+      <div class="storage-card">
+        <div><span>Storage</span><strong id="storageLabel">계산 중</strong></div>
+        <div class="storage-track"><i id="storageBar"></i></div>
+        <small id="storageCount">—</small>
+      </div>
+      <button id="accountButton" class="account"><span class="avatar">JJ</span><span><b>My Archive</b><small>Personal workspace</small></span><span data-icon="more"></span></button>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button id="mobileMenu" class="icon-button mobile-only" aria-label="메뉴"><span data-icon="menu"></span></button>
+        <button id="backButton" class="icon-button" aria-label="이전 폴더" disabled><span data-icon="back"></span></button>
+        <button id="forwardButton" class="icon-button" aria-label="다음 폴더" disabled><span data-icon="forward"></span></button>
+        <button id="searchButton" class="global-search"><span data-icon="search"></span><span>Search NAS</span><kbd>⌘ K</kbd></button>
+        <button id="uploadButton" class="button primary"><span data-icon="upload"></span><span>Upload</span></button>
+        <input id="fileInput" type="file" multiple hidden>
+      </header>
+
+      <main id="content" class="content" tabindex="-1"></main>
+    </div>
+
+    <aside id="previewPanel" class="preview-panel" aria-label="미리보기">
+      <div id="previewResizeHandle" class="preview-resize-handle" role="separator" aria-label="미리보기 패널 너비 조절" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="720" tabindex="0"></div>
+      <header><strong>Preview</strong><button id="closePreview" class="icon-button" aria-label="미리보기 닫기"><span data-icon="close"></span></button></header>
+      <div id="previewBody" class="preview-body"><div class="preview-empty"><span data-icon="file"></span><p>파일을 선택하면<br>여기에 미리보기가 표시됩니다.</p></div></div>
+    </aside>
+
+    <button id="drawerScrim" class="drawer-scrim" aria-label="열린 패널 닫기"></button>
+
+    <footer id="audioPlayer" class="audio-player hidden">
+      <div class="audio-file"><div class="audio-cover"><span data-icon="music"></span></div><div><strong id="audioName">—</strong><small id="audioPath">—</small></div></div>
+      <div class="audio-center">
+        <div class="audio-controls"><button id="prevTrack" aria-label="이전"><span data-icon="previous"></span></button><button id="playPause" class="play-button" aria-label="재생"><span data-icon="play"></span></button><button id="nextTrack" aria-label="다음"><span data-icon="next"></span></button></div>
+        <div class="audio-timeline"><span id="currentTime">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="duration">0:00</span></div>
+      </div>
+      <div class="volume"><button id="volumeToggle" aria-label="음량 조절, 더블클릭으로 음소거" aria-expanded="false"><span data-icon="volume"></span></button><div id="volumePopover" class="volume-popover hidden"><input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" orient="vertical" aria-label="음량"></div></div>
+      <audio id="audio" preload="metadata"></audio>
+    </footer>
+  </div>
+
+  <div id="dropOverlay" class="drop-overlay hidden"><div><span data-icon="upload"></span><strong>여기에 파일을 놓아 업로드</strong><small>모든 파일 형식을 지원합니다.</small></div></div>
+  <div id="toastRegion" class="toasts" aria-live="polite"></div>
+
+  <div id="commandPalette" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="검색">
+    <div class="command-palette">
+      <label><span data-icon="search"></span><input id="commandInput" placeholder="파일, 폴더, 논문, 저자 또는 태그 검색"><kbd>ESC</kbd></label>
+      <div id="commandResults" class="command-results"></div>
+    </div>
+  </div>
+
+  <div id="formModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <form id="formModalCard" class="modal-card">
+      <header><div><h2 id="modalTitle">새 폴더</h2><p id="modalDescription"></p></div><button type="button" class="icon-button" data-close-modal><span data-icon="close"></span></button></header>
+      <div id="modalFields" class="modal-fields"></div>
+      <p id="modalError" class="form-error"></p>
+      <footer><button type="button" class="button" data-close-modal>취소</button><button id="modalSubmit" class="button primary" type="submit">저장</button></footer>
+    </form>
+  </div>
+
+  <div id="pdfModal" class="pdf-modal hidden" role="dialog" aria-modal="true">
+    <header><strong id="pdfTitle">PDF</strong><div class="pdf-tools"><button id="pdfPrev" class="icon-button" aria-label="이전 페이지"><span data-icon="back"></span></button><label><input id="pdfPage" type="number" min="1" value="1"> 페이지</label><button id="pdfNext" class="icon-button" aria-label="다음 페이지"><span data-icon="forward"></span></button><button id="pdfZoomOut" class="icon-button" aria-label="축소">−</button><span id="pdfZoomLabel">100%</span><button id="pdfZoomIn" class="icon-button" aria-label="확대">＋</button><a id="pdfDownload" class="button" download><span data-icon="download"></span>Download</a><button id="pdfClose" class="icon-button" aria-label="닫기"><span data-icon="close"></span></button></div></header>
+    <iframe id="pdfFrame" title="PDF Viewer"></iframe>
+  </div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
